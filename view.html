@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js" integrity="sha384-gDaozqUvc4HTgo8iZjwth73C6dDDeOJsAgpxBcMpZYztUfjHXpzrpdrHRdVp8ySO" crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<style>
+    html,body{
+        height: 100%;
+    }
+    .main-image{
+        height: 100%;
+        background-position: center center;
+        background-repeat: no-repeat;
+    }
+</style>
+<body>
+<section class="main-image" id="target">
+
+</section>
+
+
+
+<script>
+    const cId = window.location.search.substr(1).split("=")[1];
+
+    function renderImage(data){
+        document.getElementById('target').style.backgroundImage = 'url("/images/'+data.data.src+'")'
+    }
+
+
+    function getUpdatedImage(){
+        axios.get('/image/'+cId).then(renderImage);
+    }
+
+
+
+    function setup() {
+        getUpdatedImage()
+        console.log("Setting up socket")
+
+        socket = io()
+
+        console.log(socket)
+
+        if (socket !== undefined) {
+            socket.on('connect', fb => {
+                alert('connected')
+            })
+
+            socket.on("changeImage", (message) => {
+                console.log(message.speed)
+                if(message.speed.x < -0.26){
+			document.querySelector('body').style.background = 'blue';
+		} else if(message.speed.x < -0.1){
+			document.querySelector('body').style.background = 'red';
+
+		} else {
+			document.querySelector('body').style.background = 'white';
+		}
+		//getUpdatedImage()
+            })
+
+        }
+    }
+
+    setup();
+
+</script>
+</body>
+</html>
