@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express')
 const socket = require('socket.io')
 
@@ -13,10 +14,10 @@ const io = socket.listen(server);
 
 app.use('/images',express.static(__dirname + '/images'))
 
-const images = [{
+/*const images = [{
     cid: 0,
     images:['bird.png']
-}];
+}];*/
 
 
 app.get('/', (req, res) => {
@@ -25,12 +26,18 @@ app.get('/', (req, res) => {
 })
 
 app.get('/image/:cid', (req, res) => {
-    let image = images.find(i => i.cid === Number(req.params.cid));
+    if(parseInt(req.params.cid) >= 0 && parseInt(req.params.cid) <= 12){
+        res.json({src:'Flying_Bird/Bird' + (Number(req.params.cid) +1) + '.png'});
+    } else {
+        res.json({src:'nan'})
+    }
+
+   /* let image = images.find(i => i.cid === Number(req.params.cid));
     if(image){
         res.json({src:image.images[0]});
     } else {
         res.json({src:'nan'})
-    }
+    }*/
 
 })
 

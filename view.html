@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <title>Welcome</title>
-    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js" integrity="sha384-gDaozqUvc4HTgo8iZjwth73C6dDDeOJsAgpxBcMpZYztUfjHXpzrpdrHRdVp8ySO" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js"
+            integrity="sha384-gDaozqUvc4HTgo8iZjwth73C6dDDeOJsAgpxBcMpZYztUfjHXpzrpdrHRdVp8ySO"
+            crossorigin="anonymous"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <style>
-    html,body{
+    html, body {
         height: 100%;
     }
-    .main-image{
+
+    .main-image {
         height: 100%;
         background-position: center center;
-        background-repeat: no-repeat;
+        background-repeat: repeat-y;
     }
 </style>
 <body>
@@ -23,19 +26,18 @@
 </section>
 
 
-
 <script>
+    const imageContainer = document.getElementById('target');
     const cId = window.location.search.substr(1).split("=")[1];
 
-    function renderImage(data){
-        document.getElementById('target').style.backgroundImage = 'url("/images/'+data.data.src+'")'
+    function renderImage(data) {
+        imageContainer.style.backgroundImage = 'url("/images/' + data.data.src + '")'
     }
 
 
-    function getUpdatedImage(){
-        axios.get('/image/'+cId).then(renderImage);
+    function getUpdatedImage() {
+        axios.get('/image/' + cId).then(renderImage);
     }
-
 
 
     function setup() {
@@ -48,20 +50,24 @@
 
         if (socket !== undefined) {
             socket.on('connect', fb => {
-                alert('connected')
+                console.log('Connected as IPAD ' + cId);
             })
 
             socket.on("changeImage", (message) => {
-                console.log(message.speed)
-                if(message.speed.x < -0.26){
-			document.querySelector('body').style.background = 'blue';
-		} else if(message.speed.x < -0.1){
-			document.querySelector('body').style.background = 'red';
+                if (message.speed.x < -0.26) {
+                    document.querySelector('body').style.background = 'blue';
+                } else if (message.speed.x < -0.1) {
+                    // document.querySelector('body').style.background = 'red';
+                    imageContainer.style.backgroundSize = '75%';
+                    imageContainer.style.backgroundPosition = 'center top';
+                } else {
+                    document.querySelector('body').style.background = 'white';
+                    // imageContainer.style.backgroundSize = 'contain';
+                    imageContainer.style.backgroundSize = '50%';
+                    imageContainer.style.backgroundPosition = 'center top';
 
-		} else {
-			document.querySelector('body').style.background = 'white';
-		}
-		//getUpdatedImage()
+
+                }
             })
 
         }
