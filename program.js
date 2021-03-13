@@ -44,7 +44,6 @@ app.get('/image/:cid', (req, res) => {
 const allClients = [];
 
 io.on('connection', client =>{
-    console.log(client)
     allClients.push(client);
     client.emit("connect",{any:'thing'})
 
