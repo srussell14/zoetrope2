@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js"
+            integrity="sha384-gDaozqUvc4HTgo8iZjwth73C6dDDeOJsAgpxBcMpZYztUfjHXpzrpdrHRdVp8ySO"
+            crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<style>
+    html, body {
+        height: 100%;
+        background-color: rgb(0,200,255);
+    }
+
+    .dot{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        border-radius: 50%;
+        background-color: black;
+    }
+
+</style>
+<body>
+<form id="form">
+    <input type="text" name="cId" placeholder="enter iPAD id">
+    <input type="submit" value="go">
+</form>
+<div style="height: 100%; position: relative">
+
+    <section class="dot" id="target"></section>
+</div>
+
+
+
+<script>
+    const imageContainer = document.getElementById('target');
+
+
+    const cId = window.location.search.substr(1).split("=")[1];
+
+    function renderDot(size) {
+        imageContainer.style.width = size;
+        imageContainer.style.height = size;
+
+    }
+
+
+
+    function setup() {
+        console.log("Setting up socket")
+
+        socket = io()
+
+        console.log(socket)
+
+        if (socket !== undefined) {
+            socket.on('connect', fb => {
+                if(cId){
+                    document.getElementById('form').style.display = 'none';
+                    imageContainer.style.display = 'block';
+                }
+                console.log('Connected as IPAD ' + cId);
+            })
+
+            socket.on("changeImage", (message) => {
+                if (message.speed.x < -0.26) {
+                    renderDot('300px');
+                } else if (message.speed.x < -0.2) {
+                    renderDot('200px');
+                } else if (message.speed.x < -0.1) {
+                    renderDot('100px');
+
+                } else {
+                    renderDot('60px');
+
+                }
+            })
+
+        }
+    }
+
+    setup();
+
+</script>
+</body>
+</html>

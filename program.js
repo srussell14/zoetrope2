@@ -21,8 +21,11 @@ app.use('/images',express.static(__dirname + '/images'))
 
 
 app.get('/', (req, res) => {
-
-    res.sendFile(__dirname+ '/view.html');
+    if(typeof req.query.v !== 'undefined'){
+        res.sendFile(__dirname+ '/view' + req.query.v + '.html')
+    } else {
+        res.sendFile(__dirname+ '/view.html');
+    }
 })
 
 app.get('/image/:cid', (req, res) => {
