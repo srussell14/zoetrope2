@@ -42,14 +42,36 @@ io.on('connection', client =>{
     allClients.push(client);
     client.emit("connect",{any:'thing'})
 
+    // attach cId (iPad identifier) to socket-client
+    client.on("cId", p => {
+        client.cId = p.cId;
+    })
+    // listen to "leaving canvas event"
+    client.on("leave", payload => {
+        const newPayload = {cId: payload.cId+1, y: payload.y};
+
+        if(!allClients.find(c => c.cId === newPayload.cId)){
+            newPayload.cId = allClients[0].cId;
+        }
+        // tell all iPads about possible entry into their canvas
+        allClients.forEach(c =>{
+            c.emit("enter",newPayload)
+        })
+    })
 })
+
 
 let threshold;
 // attach ADXL listener
 speedometer.listen(speed => {
 	//console.log(speed);
-    allClients.forEach(c => {
-        c.emit("changeImage",{speed})
+    allClients.forEach((c,i) => {
+        if(!c.connected){
+            allClients.splice(i,1);
+        } else {
+            c.emit("changeImage",{speed})
+        }
+
     })
 
 })
