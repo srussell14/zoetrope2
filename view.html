@@ -18,6 +18,7 @@
     .main-image {
         display: none;
         position: relative;
+        overflow: hidden;
         height: 100%;
         background-position: center center;
         background-repeat: no-repeat;
@@ -34,6 +35,9 @@
         top: 60%;
         display: none;
     }
+    .animate{
+        transition: all ease-in 3s;
+    }
 </style>
 <body>
 <form id="form">
@@ -47,11 +51,18 @@
 
 
 <script>
+    const delay = 3000;
     const imageContainer = document.getElementById('target');
     const img2 = document.getElementById('img-two');
     const img3 = document.getElementById('img-three');
 
     const cId = window.location.search.substr(1).split("=")[1];
+
+    let socket;
+
+    const gif = document.createElement('img');
+    gif.src = '/images/bird.gif';
+    gif.className = 'animate';
 
     function renderImage(data) {
         imageContainer.style.backgroundImage = 'url("/images/' + data.data.src + '")';
@@ -64,6 +75,28 @@
         axios.get('/image/' + cId).then(renderImage);
     }
 
+    let moving = true;
+    let iPadContainsBird = false;
+    let leaveEmit;
+    imageContainer.addEventListener('click', (ev) =>{
+        clearTimeout(leaveEmit);
+        gif.style.top = ev.clientY + 'px';
+        gif.style.left = ev.clientX + 'px';
+        setTimeout(()=>{
+
+            fly(ev.clientY + 'px')
+        }, delay);
+        console.log(ev)
+    })
+
+    function fly(startY){
+        // gif.style.left = 'calc(100vw + 138px)';
+        gif.style.left = 'calc(100vw + 138px)';
+        gif.style.top = startY;
+        leaveEmit = setTimeout(()=>{
+            socket.emit("leave",{cId: Number(cId), y: startY})
+        },delay - 300)
+    }
 
     function setup() {
         getUpdatedImage()
@@ -71,7 +104,6 @@
 
         socket = io()
 
-        console.log(socket)
 
         if (socket !== undefined) {
             socket.on('connect', fb => {
@@ -80,11 +112,23 @@
                     imageContainer.style.display = 'block';
                 }
                 console.log('Connected as IPAD ' + cId);
+                socket.emit("cId",{cId:Number(cId)})
+            })
+            // react on enter event
+            socket.on("enter", (message)=>{
+                if(message.cId === Number(cId)){
+                    // initiate interactive bird rendering
+                    renderStatic(message.y, '-138px');
+                    // fly animation
+                    setTimeout(()=>fly(message.y))
+                }
             })
 
             socket.on("changeImage", (message) => {
+
                 console.log(message)
                 if (message.speed.x < -0.26) {
+                    moving = true;
                     // three birds
                     imageContainer.style.backgroundSize = '50%';
                     imageContainer.style.backgroundPosition = 'top left';
@@ -94,6 +138,7 @@
                     img3.style.display = 'block';
 
                 } else if (message.speed.x < -0.1) {
+                    moving = true;
                     // two birds
                     imageContainer.style.backgroundSize = '60%';
                     imageContainer.style.backgroundPosition = 'center top';
@@ -102,16 +147,39 @@
                     img3.style.display = 'none';
                     img2.style.top = '50%'
 
-                } else {
+                } else if(message.speed.x < -0.01) {
+                    moving = true;
                     // one bird
                     imageContainer.style.backgroundSize = 'contain';
                     img2.style.display = 'none';
                     img3.style.display = 'none';
 
+                } else {
+                    // interactive bird mode recognition
+                    if(moving){
+                        moving = false;
+                        imageContainer.style.background = 'none';
+                        if(Number(cId) === 0){
+                            renderStatic('calc(50% - 48px)');
+
+                        }
+
+
+                    }
+
                 }
             })
 
         }
+    }
+    // positioning interactive bird based on socket and previous position
+    function renderStatic(y, x = '0px'){
+        gif.width = 138;
+        gif.height = 96;
+        gif.style.position = 'absolute';
+        gif.style.top = y;
+        gif.style.left = x;
+        imageContainer.appendChild(gif);
     }
 
     setup();

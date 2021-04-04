@@ -20,7 +20,8 @@ module.exports = {
                 // debugging: serving fake data
                 const steps = [0,-0.11,-.21,-1];
                 cb({x:steps[debugStepper],y:1,z:1})
-                debugStepper = typeof steps[debugStepper+1] === 'undefined' ? 0 : debugStepper+1;
+                // debugStepper = typeof steps[debugStepper+1] === 'undefined' ? 0 : debugStepper+1;
+                debugStepper = 0;
             }
 
         }, 200);
