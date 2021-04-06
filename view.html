@@ -59,12 +59,14 @@
     const cId = window.location.search.substr(1).split("=")[1];
 
     let socket;
+    let iPadBird;
 
     const gif = document.createElement('img');
     gif.src = '/images/bird.gif';
     gif.className = 'animate';
 
     function renderImage(data) {
+        iPadBird = data.data.src;
         imageContainer.style.backgroundImage = 'url("/images/' + data.data.src + '")';
         img2.src = '/images/' + data.data.src;
         img3.src = '/images/' + data.data.src;
@@ -174,7 +176,7 @@
     }
     function removeSingleBird(){
         gif.style.display = "none";
-
+        imageContainer.style.backgroundImage = 'url("/images/' + iPadBird + '")'
     }
 
     // positioning interactive bird based on socket and previous position
