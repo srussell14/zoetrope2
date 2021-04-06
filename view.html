@@ -118,6 +118,7 @@
             })
             // react on enter event
             socket.on("enter", (message)=>{
+                console.log("enter", message)
                 if(message.cId === Number(cId)){
                     // initiate interactive bird rendering
                     renderStatic(message.y, '-138px');
@@ -128,7 +129,7 @@
 
             socket.on("changeImage", (message) => {
 
-                console.log(message)
+               
                 if (message.speed.x < -0.26) {
                     moving = true;
                     // three birds
