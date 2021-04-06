@@ -146,14 +146,14 @@
                     img2.style.transform = 'scale(1.2)';
                     img3.style.display = 'none';
                     img2.style.top = '50%'
-
+                    removeSingleBird()
                 } else if(message.speed.x < -0.01) {
                     moving = true;
                     // one bird
                     imageContainer.style.backgroundSize = 'contain';
                     img2.style.display = 'none';
                     img3.style.display = 'none';
-
+                    removeSingleBird()
                 } else {
                     // interactive bird mode recognition
                     if(moving){
@@ -172,6 +172,11 @@
 
         }
     }
+    function removeSingleBird(){
+        gif.style.display = "none";
+
+    }
+
     // positioning interactive bird based on socket and previous position
     function renderStatic(y, x = '0px'){
         gif.width = 138;
