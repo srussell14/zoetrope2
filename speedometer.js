@@ -24,6 +24,6 @@ module.exports = {
                 debugStepper = 0;
             }
 
-        }, 200);
+        }, 400);
     }
 }
