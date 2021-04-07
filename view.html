@@ -59,12 +59,14 @@
     const cId = window.location.search.substr(1).split("=")[1];
 
     let socket;
+    let iPadBird;
 
     const gif = document.createElement('img');
     gif.src = '/images/bird.gif';
     gif.className = 'animate';
 
     function renderImage(data) {
+        iPadBird = data.data.src;
         imageContainer.style.backgroundImage = 'url("/images/' + data.data.src + '")';
         img2.src = '/images/' + data.data.src;
         img3.src = '/images/' + data.data.src;
@@ -79,6 +81,9 @@
     let iPadContainsBird = false;
     let leaveEmit;
     imageContainer.addEventListener('click', (ev) =>{
+        if(!iPadContainsBird){
+            return;
+        }
         clearTimeout(leaveEmit);
         gif.style.top = ev.clientY + 'px';
         gif.style.left = ev.clientX + 'px';
@@ -95,6 +100,7 @@
         gif.style.top = startY;
         leaveEmit = setTimeout(()=>{
             socket.emit("leave",{cId: Number(cId), y: startY})
+            iPadContainsBird = false;
         },delay - 300)
     }
 
@@ -116,17 +122,19 @@
             })
             // react on enter event
             socket.on("enter", (message)=>{
+                console.log("enter", message)
                 if(message.cId === Number(cId)){
+                    iPadContainsBird = true;
                     // initiate interactive bird rendering
                     renderStatic(message.y, '-138px');
                     // fly animation
-                    setTimeout(()=>fly(message.y))
+                    setTimeout(()=>fly(message.y),5)
                 }
             })
 
             socket.on("changeImage", (message) => {
 
-                console.log(message)
+               
                 if (message.speed.x < -0.26) {
                     moving = true;
                     // three birds
@@ -156,15 +164,15 @@
                     removeSingleBird()
                 } else {
                     // interactive bird mode recognition
-                    if(moving && 1==2){
-                        moving = false;
-                        imageContainer.style.background = 'none';
+                    if(moving){
+                        
+                        imageContainer.style.backgroundImage = 'none';
                         if(Number(cId) === 0){
                             renderStatic('calc(50% - 48px)');
-
+                            iPadBird = true;
                         }
 
-
+                        moving = false;
                     }
 
                 }
@@ -174,7 +182,7 @@
     }
     function removeSingleBird(){
         gif.style.display = "none";
-
+        imageContainer.style.backgroundImage = 'url("/images/' + iPadBird + '")'
     }
 
     // positioning interactive bird based on socket and previous position

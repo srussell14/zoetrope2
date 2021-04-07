@@ -51,7 +51,7 @@ io.on('connection', client =>{
         const newPayload = {cId: payload.cId+1, y: payload.y};
 
         if(!allClients.find(c => c.cId === newPayload.cId)){
-            newPayload.cId = allClients[0].cId;
+            newPayload.cId = allClients.sort((a,b)=>{ return a.cId < b.cId ? -1 : 1 })[0].cId;
         }
         // tell all iPads about possible entry into their canvas
         allClients.forEach(c =>{
