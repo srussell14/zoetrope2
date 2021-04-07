@@ -81,6 +81,9 @@
     let iPadContainsBird = false;
     let leaveEmit;
     imageContainer.addEventListener('click', (ev) =>{
+        if(!iPadContainsBird){
+            return;
+        }
         clearTimeout(leaveEmit);
         gif.style.top = ev.clientY + 'px';
         gif.style.left = ev.clientX + 'px';
@@ -97,6 +100,7 @@
         gif.style.top = startY;
         leaveEmit = setTimeout(()=>{
             socket.emit("leave",{cId: Number(cId), y: startY})
+            iPadContainsBird = false;
         },delay - 300)
     }
 
@@ -120,6 +124,7 @@
             socket.on("enter", (message)=>{
                 console.log("enter", message)
                 if(message.cId === Number(cId)){
+                    iPadContainsBird = true;
                     // initiate interactive bird rendering
                     renderStatic(message.y, '-138px');
                     // fly animation
@@ -164,7 +169,7 @@
                         imageContainer.style.backgroundImage = 'none';
                         if(Number(cId) === 0){
                             renderStatic('calc(50% - 48px)');
-
+                            iPadBird = true;
                         }
 
                         moving = false;
