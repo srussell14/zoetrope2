@@ -123,7 +123,7 @@
             // react on enter event
             socket.on("enter", (message)=>{
                 console.log("enter", message)
-                alert(message.cId)
+                imageContainer.style.background = 'transparent';
                 if(message.cId === Number(cId)){
                     iPadContainsBird = true;
                     // initiate interactive bird rendering
