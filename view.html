@@ -51,20 +51,32 @@
 
 
 <script>
+    /*
+    * Section 1: set up control of visible HTML & JavaScript
+    * */
     const delay = 3000;
     const imageContainer = document.getElementById('target');
     const img2 = document.getElementById('img-two');
     const img3 = document.getElementById('img-three');
 
+    // read in cId (tablet identifier)
     const cId = window.location.search.substr(1).split("=")[1];
 
     let socket;
     let iPadBird;
 
+    /*
+    * Setup for pixel animation with touch mode:
+    * prepare animated gif
+    * */
     const gif = document.createElement('img');
     gif.src = '/images/bird.gif';
     gif.className = 'animate';
 
+    /*
+    * Setup for single cell animation mode:
+    *
+    * */
     function renderImage(data) {
         iPadBird = data.data.src;
         imageContainer.style.backgroundImage = 'url("/images/' + data.data.src + '")';
@@ -77,6 +89,11 @@
         axios.get('/image/' + cId).then(renderImage);
     }
 
+    /*
+    * Section 2: handle click/touch events
+    * handles touch position in order to influence/start animation
+    *
+    * */
     let moving = true;
     let iPadContainsBird = false;
     let leaveEmit;
@@ -93,7 +110,7 @@
         }, delay);
         console.log(ev)
     })
-
+    // animation path & socket communication
     function fly(startY){
         // gif.style.left = 'calc(100vw + 138px)';
         gif.style.left = 'calc(100vw + 138px)';
@@ -104,6 +121,14 @@
         },delay - 300)
     }
 
+    /*
+    * End Section 2
+    *
+    * */
+
+    /*
+    * Section 3: listening for speed, mode and position
+    * */
     function setup() {
         getUpdatedImage()
         console.log("Setting up socket")
@@ -112,6 +137,7 @@
 
 
         if (socket !== undefined) {
+            // Registers single tablet with the server (+ basic display)
             socket.on('connect', fb => {
                 if(cId){
                     document.getElementById('form').style.display = 'none';
@@ -120,7 +146,8 @@
                 console.log('Connected as IPAD ' + cId);
                 socket.emit("cId",{cId:Number(cId)})
             })
-            // react on enter event
+            // react on enter event:
+            // check whether current tablet is supposed to start animation and execute it if applicable
             socket.on("enter", (message)=>{
                 console.log("enter", message)
                 if(message.cId === Number(cId)){
@@ -131,13 +158,14 @@
                     setTimeout(()=>fly(message.y),50)
                 }
             })
-
+            // listen to change in speed of accelerometer
             socket.on("changeImage", (message) => {
 
-               
+                /*
+                * Case three birds are shown
+                * */
                 if (message.speed.x < -0.26) {
                     moving = true;
-                    // three birds
                     imageContainer.style.backgroundSize = '50%';
                     imageContainer.style.backgroundPosition = 'top left';
                     img2.style.display = 'block';
@@ -146,8 +174,10 @@
                     img3.style.display = 'block';
 
                 } else if (message.speed.x < -0.1) {
+                    /*
+                    * Case two birds are shown
+                    * */
                     moving = true;
-                    // two birds
                     imageContainer.style.backgroundSize = '60%';
                     imageContainer.style.backgroundPosition = 'center top';
                     img2.style.display = 'block';
@@ -156,14 +186,18 @@
                     img2.style.top = '50%'
                     removeSingleBird()
                 } else if(message.speed.x < -0.01) {
+                    /*
+                    * Case one birds is shown
+                    * */
                     moving = true;
-                    // one bird
                     imageContainer.style.backgroundSize = 'contain';
                     img2.style.display = 'none';
                     img3.style.display = 'none';
                     removeSingleBird()
                 } else {
-                    // interactive bird mode recognition
+                    /*
+                    * Case pixel animation with touch
+                    * */
                     if(moving){
                         
                         imageContainer.style.backgroundImage = 'none';
@@ -180,6 +214,7 @@
 
         }
     }
+    // clear state between modes
     function removeSingleBird(){
         gif.style.display = "none";
         imageContainer.style.backgroundImage = 'url("/images/' + iPadBird + '")'

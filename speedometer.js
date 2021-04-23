@@ -1,3 +1,8 @@
+/*
+* This file is responsible for reading the python based velocity of the accelerometer
+*
+* In this scenario, python is run by a nodeJS child process
+* */
 const {spawn} = require('child_process');
 const debugMode = JSON.parse(process.env.DEBUG_MODE);
 console.log('Debug mode:', process.env.DEBUG_MODE, typeof process.env.DEBUG_MODE);
@@ -6,10 +11,11 @@ module.exports = {
     listen(cb){
         let debugStepper = 0;
         // interval listening
+        // execution of python script every x milliseconds (x being 400ms)
         setInterval(()=>{
             // execute python script
             if(!debugMode){
-
+                // adxl_node.py reads x,y,z axis acceleration
                 const python = spawn('python3',['../adxl_node.py']);
                 python.stdout.on('data', data => {
                     // call listener's callback function
